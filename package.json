@@ -16,5 +16,10 @@
   "bugs": {
     "url": "https://github.com/BarunMahato/Backend-Of-Course-Selling-App/issues"
   },
-  "homepage": "https://github.com/BarunMahato/Backend-Of-Course-Selling-App#readme"
+  "homepage": "https://github.com/BarunMahato/Backend-Of-Course-Selling-App#readme",
+  "dependencies": {
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.13.2"
+  }
 }
