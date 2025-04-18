@@ -1,24 +1,20 @@
 const express = require('express');
+const mongoose = require('mongoose');
+require('dotenv').config();
 
+const {userRouter} = require('./routes/user');
+const {courseRouter} = require('./routes/course');
+const {adminRouter} = require('./routes/admin')
 const app = express();
 
-app.get("/see", function(req, res){
+app.use('/user', userRouter);
+app.use('/course', courseRouter);
+app.use('/admin', adminRouter);
 
-})
-
-app.post("/signup", function(req, res){
-
-})
-
-app.post("/login", function(req, res){
-
-})
-
-app.post("/purchase", function(req, res){
-
-})
-
-
-app.listen(3000, function(req, res){
-    console.log("Listening on port 3000.");
-})
+async function main(){
+    await mongoose.connect(process.env.MONGODB_URI);
+    app.listen(3000, function(req, res){
+        console.log("Listening on port 3000.")
+    });
+}
+main();
