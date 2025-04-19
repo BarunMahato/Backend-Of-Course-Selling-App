@@ -39,7 +39,8 @@ userRouter.post("/signup",async function(req, res){
     const parseDataWithSuccess = requiredBody.safeParse(req.body);
     if(!parseDataWithSuccess.success){
         return res.json({
-            message : "Incorrect format of the input"
+            message : "Incorrect format of the input",
+            error: parseDataWithSuccess.error,
         })
     }
 
@@ -66,16 +67,15 @@ userRouter.post("/signup",async function(req, res){
 userRouter.post("/signin", async function(req, res){
     const email = req.body.email;  
     const password = req.body.password;
-    const foundUser = await userModel.find({
+    const foundUser = await userModel.findOne({
         email,
     })
     if(!foundUser){
-        res.json({
+        return res.json({
             message: "It seems like you mistyped the email. We suggest you to check it and reenter it again."
         });
-        return
     }
-    const comparedPassword = await bcrypt.compare(password, foundUser.password);
+    const comparedPassword = bcrypt.compare(password, foundUser.password);
     if(comparedPassword){
         const token = jwt.sign({
             id : foundUser._id.toString(),
@@ -89,9 +89,6 @@ userRouter.post("/signin", async function(req, res){
             message: "The password you entered did not match in our database.",
         })
     }
-    res.json({
-        message: "You are signed in"
-    })
 })
 
 

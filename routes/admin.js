@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const {z} = require('zod');
 const bcrypt = require('bcrypt');
 
-const JWT_SECRET  = process.env.JWT_SECRET;
+const JWT_SECRET  = process.env.JWT_ADMIN_SECRET;
 const adminRouter = Router();
 const {adminModel} = require('../db');
 
@@ -36,45 +36,44 @@ adminRouter.post("/signup", async function(req, res){
     })
     const parseDataWithSuccess = requiredBody.safeParse(req.body);
     if(!parseDataWithSuccess.success){
-        res.json({
-            message : "Incorrect format of the input"
+        return res.json({
+            message : "Incorrect format of the input",
+            error: parseDataWithSuccess.error,
         })
-        return
     }
-    
+
     const {firstName, lastName, email, password} = parseDataWithSuccess.data;
 
     try{
         const hashedPassword = await bcrypt.hash(password, 5);
-        await userModel.create({
+        await adminModel.create({
             firstName,
             lastName,
             email,
             password : hashedPassword
         })
+        return res.json({
+            message: "You are signed up."
+        })
     }catch(e){
-        res.json({
+        return res.json({
             message: "Duplicate Entries."
         })
     }
-    res.json({
-        message: "You are signed up."
-    })
 })
 
 adminRouter.post("/signin",async function(req, res){
     const email = req.body.email;  
     const password = req.body.password;
-    const foundUser = await userModel.find({
+    const foundUser = await adminModel.findOne({
         email,
     })
     if(!foundUser){
-        res.json({
+        return res.json({
             message: "It seems like you mistyped the email. We suggest you to check it and reenter it again."
         });
-        return
     }
-    const comparedPassword = await bcrypt.compare(password, foundUser.password);
+    const comparedPassword = bcrypt.compare(password, foundUser.password);
     if(comparedPassword){
         const token = jwt.sign({
             id : foundUser._id.toString(),
@@ -88,9 +87,6 @@ adminRouter.post("/signin",async function(req, res){
             message: "The password you entered did not match in our database.",
         })
     }
-    res.json({
-        message: "You are signed in"
-    })
 })
 
 adminRouter.post("/course", function(req, res){
