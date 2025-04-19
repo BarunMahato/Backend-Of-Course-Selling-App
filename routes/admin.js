@@ -35,12 +35,14 @@ adminRouter.post("/signup", async function(req, res){
         })
     })
     const parseDataWithSuccess = requiredBody.safeParse(req.body);
-    if(!parseDataWithSuccess){
+    if(!parseDataWithSuccess.success){
         res.json({
             message : "Incorrect format of the input"
         })
         return
     }
+    
+    const {firstName, lastName, email, password} = parseDataWithSuccess.data;
 
     try{
         const hashedPassword = await bcrypt.hash(password, 5);

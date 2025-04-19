@@ -37,12 +37,13 @@ userRouter.post("/signup",async function(req, res){
         })
     })
     const parseDataWithSuccess = requiredBody.safeParse(req.body);
-    if(!parseDataWithSuccess){
-        res.json({
+    if(!parseDataWithSuccess.success){
+        return res.json({
             message : "Incorrect format of the input"
         })
-        return
     }
+
+    const {firstName, lastName, email, password} = parseDataWithSuccess.data;
 
     try{
         const hashedPassword = await bcrypt.hash(password, 5);
@@ -52,14 +53,14 @@ userRouter.post("/signup",async function(req, res){
             email,
             password : hashedPassword
         })
+        return res.json({
+            message: "You are signed up."
+        })
     }catch(e){
-        res.json({
+        return res.json({
             message: "Duplicate Entries."
         })
     }
-    res.json({
-        message: "You are signed up."
-    })
 })
 
 userRouter.post("/signin", async function(req, res){
