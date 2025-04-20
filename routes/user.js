@@ -1,7 +1,7 @@
 const { Router } = require('express');
 const bcrypt = require('bcrypt');
 const {z} = require('zod');
-const {userModel} = require('../db');
+const {userModel, purchaseModel} = require('../db');
 
 require('dotenv').config();
 
@@ -80,9 +80,14 @@ userRouter.post("/signin", async function(req, res){
 })
 
 
-userRouter.get("/purchases",userMiddleware, function(req, res){
+userRouter.get("/purchases",userMiddleware,async function(req, res){
+    const userId = req.userId;
+    const purchase = await purchaseModel.find({
+        userId
+    })
     res.json({
-        message: "Your purchase list."
+        message: "Your purchase list.",
+        purchase
     })
 })
 
