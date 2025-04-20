@@ -6,22 +6,10 @@ const {userModel} = require('../db');
 require('dotenv').config();
 
 const jwt = require('jsonwebtoken');
+const { userMiddleware } = require('../middleware/userMiddleware');
 const JWT_SECRET  = process.env.JWT_USER_SECRET;
 
 const userRouter = Router();
-
-function auth( req, res, next){
-    const token = req.headers.token;
-    const response = jwt.verify(token, JWT_SECRET);
-    if(response){
-        req.userId = response.userId;
-        next();
-    }else{
-        res.json({
-            message: "Sorry your userId did not match"
-        })
-    }
-}
 
 userRouter.post("/signup",async function(req, res){
     const requiredBody = z.object({
@@ -92,7 +80,7 @@ userRouter.post("/signin", async function(req, res){
 })
 
 
-userRouter.get("/purchases", function(req, res){
+userRouter.get("/purchases",userMiddleware, function(req, res){
     res.json({
         message: "Your purchase list."
     })
