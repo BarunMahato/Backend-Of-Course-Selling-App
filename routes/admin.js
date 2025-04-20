@@ -96,28 +96,30 @@ adminRouter.post("/course", adminMiddleware,async function(req, res){
 
 adminRouter.put("/course", adminMiddleware, async function(req, res){
     const adminId = req.userId;
-    const {title, description, imageUrl, price} = req.body;
-    const course = await courseModel.findOne({
-        creatorId : adminId
+    const {title, description, imageUrl, price, courseId} = req.body;
+    const course = await courseModel.updateOne({
+        _id : courseId,
+        creatorId: adminId
+    },{
+        title,
+        description,
+        imageUrl,
+        price,
+    });
+    res.json({
+        message: "Course updated Successfully.",
+        courseId: course._id
     })
-    if(course){
-        course.title = title;
-        course.description = description;
-        course.imageUrl = imageUrl;
-        course.price = price;
-        res.json({
-            message: "Changes in the course were made successfully."
-        })
-    }else{
-        res.json({
-            message: "You have not created any course"
-        })
-    }
 })
 
-adminRouter.get("/course/bulk", function(req, res){
+adminRouter.get("/course/bulk",adminMiddleware,async function(req, res){
+    const adminId = req.userId;
+    const courses = await courseModel.find({
+        creatorId: adminId,
+    })
     res.json({
-        message: "All course on bulk"
+        message: "All course on bulk",
+        courses
     })
 })
 
