@@ -1,7 +1,7 @@
 const { Router } = require('express');
 const bcrypt = require('bcrypt');
 const {z} = require('zod');
-const {userModel, purchaseModel} = require('../db');
+const {userModel, purchaseModel, courseModel} = require('../db');
 
 require('dotenv').config();
 
@@ -85,9 +85,18 @@ userRouter.get("/purchases",userMiddleware,async function(req, res){
     const purchase = await purchaseModel.find({
         userId
     })
+    const purchasesId = [];
+    for(let i = 0; i < purchase.length; i++){
+        purchasesId.push(purchase[i].courseId)
+    }
+
+    const courseData = await courseModel.find({
+        _id: {$in: purchasesId}
+    })
     res.json({
         message: "Your purchase list.",
-        purchase
+        purchase,
+        courseData
     })
 })
 
