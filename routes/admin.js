@@ -4,22 +4,11 @@ const jwt = require('jsonwebtoken');
 const {z} = require('zod');
 const bcrypt = require('bcrypt');
 
+
 const JWT_SECRET  = process.env.JWT_ADMIN_SECRET;
 const adminRouter = Router();
-const {adminModel} = require('../db');
-
-function auth( req, res, next){
-    const token = req.headers.token;
-    const response = jwt.verify(token, JWT_SECRET);
-    if(response){
-        req.userId = response.userId;
-        next();
-    }else{
-        res.json({
-            message: "Sorry your userId did not match"
-        })
-    }   
-}
+const {adminModel, courseModel} = require('../db');
+const { adminMiddleware } = require('../middleware/adminMiddleware');
 
 adminRouter.post("/signup", async function(req, res){
     const requiredBody = z.object({
@@ -89,16 +78,41 @@ adminRouter.post("/signin",async function(req, res){
     }
 })
 
-adminRouter.post("/course", function(req, res){
+adminRouter.post("/course", adminMiddleware,async function(req, res){
+    const adminId = req.userId;
+    const {title, description, imageUrl, price} = req.body;
+    const course = await courseModel.create({
+        title,
+        description,
+        imageUrl,
+        price,
+        creatorId : adminId
+    })
     res.json({
-        message: "Course Creation"
+        message: "Course Created",
+        courseId: course._id
     })
 })
 
-adminRouter.put("/course", function(req, res){
-    res.json({
-        message: "Course was put into it."
+adminRouter.put("/course", adminMiddleware, async function(req, res){
+    const adminId = req.userId;
+    const {title, description, imageUrl, price} = req.body;
+    const course = await courseModel.findOne({
+        creatorId : adminId
     })
+    if(course){
+        course.title = title;
+        course.description = description;
+        course.imageUrl = imageUrl;
+        course.price = price;
+        res.json({
+            message: "Changes in the course were made successfully."
+        })
+    }else{
+        res.json({
+            message: "You have not created any course"
+        })
+    }
 })
 
 adminRouter.get("/course/bulk", function(req, res){
